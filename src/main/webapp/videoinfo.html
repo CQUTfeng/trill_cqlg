@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" type="text/css" href="../layui/css/layui.css" />
+</head>
+<body>
+<form class="layui-form" action="">
+    <div class="layui-form-item">
+        <label class="layui-form-label">视频描述</label>
+        <div class="layui-input-block">
+            <input type="text" name="videoDesc" id="videoDesc" disabled lay-verify="title" autocomplete="off" placeholder="" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">开关-默认开</label>
+        <div class="layui-input-block">
+            <input type="checkbox" id="stu" name="status" lay-skin="switch" lay-filter="switchTest" lay-text="已发布|已下线">
+        </div>
+    </div>
+
+
+</form>
+
+</body>
+<script type="text/javascript" src="../layui/layui.js"></script>
+<script>
+    layui.use('form',function(){
+        var form = layui.form;
+    })
+
+
+</script>
+</html>

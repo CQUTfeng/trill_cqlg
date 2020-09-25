@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qf.trillcqlg.dao.VideoMapper" >
+
+
+  <resultMap id="BaseResultMap" type="com.qf.trillcqlg.pojo.Video" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="VARCHAR" />
+    <result column="audio_id" property="audioId" jdbcType="VARCHAR" />
+    <result column="video_desc" property="videoDesc" jdbcType="VARCHAR" />
+    <result column="video_path" property="videoPath" jdbcType="VARCHAR" />
+    <result column="video_seconds" property="videoSeconds" jdbcType="REAL" />
+    <result column="video_width" property="videoWidth" jdbcType="INTEGER" />
+    <result column="video_height" property="videoHeight" jdbcType="INTEGER" />
+    <result column="cover_path" property="coverPath" jdbcType="VARCHAR" />
+    <result column="like_counts" property="likeCounts" jdbcType="BIGINT" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+
+  </resultMap>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from videos
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.qf.trillcqlg.pojo.Video" >
+    insert into videos (id, user_id, audio_id, 
+      video_desc, video_path, video_seconds, 
+      video_width, video_height, cover_path, 
+      like_counts, status, create_time
+      )
+    values (#{id,jdbcType=VARCHAR}, #{userId,jdbcType=VARCHAR}, #{audioId,jdbcType=VARCHAR}, 
+      #{videoDesc,jdbcType=VARCHAR}, #{videoPath,jdbcType=VARCHAR}, #{videoSeconds,jdbcType=REAL}, 
+      #{videoWidth,jdbcType=INTEGER}, #{videoHeight,jdbcType=INTEGER}, #{coverPath,jdbcType=VARCHAR}, 
+      #{likeCounts,jdbcType=BIGINT}, #{status,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.qf.trillcqlg.pojo.Video" >
+    update videos
+    set user_id = #{userId,jdbcType=VARCHAR},
+      audio_id = #{audioId,jdbcType=VARCHAR},
+      video_desc = #{videoDesc,jdbcType=VARCHAR},
+      video_path = #{videoPath,jdbcType=VARCHAR},
+      video_seconds = #{videoSeconds,jdbcType=REAL},
+      video_width = #{videoWidth,jdbcType=INTEGER},
+      video_height = #{videoHeight,jdbcType=INTEGER},
+      cover_path = #{coverPath,jdbcType=VARCHAR},
+      like_counts = #{likeCounts,jdbcType=BIGINT},
+      status = #{status,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select id, user_id, audio_id, video_desc, video_path, video_seconds, video_width, 
+    video_height, cover_path, like_counts, status, create_time
+    from videos
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+
+
+  <select id="selectAll" resultType="com.qf.trillcqlg.dto.VideoDto">
+    select videos.id, video_desc, video_path,nickname,create_time,status,like_counts
+    from videos,users where users.id=videos.user_id limit #{page},#{limit}
+  </select>
+
+  <select id="countVideo" resultType="java.lang.Long">
+    select count(id) from videos
+  </select>
+
+
+  <select id="selectByLike" resultType="com.qf.trillcqlg.dto.VideoDto">
+    select videos.id, video_desc, video_path,nickname,create_time,status,like_counts
+     from videos,users
+     <where>
+       users.id=videos.user_id
+      <if test="id != null and id !=''">
+        and videos.id like concat("%",#{id},"%")
+      </if>
+      <if test="videoDesc != null and videoDesc !=''">
+       and video_desc like concat("%",#{videoDesc},"%")
+     </if>
+     </where>
+
+  </select>
+
+  <update id="update" parameterType="java.lang.String">
+    update videos
+    set
+    <if test="field == 'like_counts'">
+      like_counts = #{value}
+    </if>
+    <if test="field == 'video_desc'">
+      video_desc = #{value}
+    </if>
+    <if test="field == 'status'">
+      status = #{value}
+    </if>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+
+</mapper>

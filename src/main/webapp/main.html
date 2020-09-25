@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../layui/css/layui.css"/>
+</head>
+
+<body>
+<div class="demoTable">
+    搜索ID：
+    <div class="layui-inline">
+        <input class="layui-input" name="id" id="vid" autocomplete="off">
+    </div>
+    评论：
+    <div class="layui-inline">
+        <input class="layui-input" name="videodesc" id="videodesc" autocomplete="off">
+    </div>
+
+    <button class="layui-btn" data-type="reload" id="search">搜索</button>
+</div>
+
+<!--级联查询-->
+<form class="layui-form">
+    <div class="layui-form-item">
+        <label class="layui-form-label">下拉选择框</label>
+        <div class="layui-input-inline">
+            <select name="interest"  id="s1" lay-filter="n1">
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">下拉选择框</label>
+        <div class="layui-input-inline">
+            <select name="s2"  id="s2">
+            </select>
+        </div>
+    </div>
+</form>
+
+<table class="layui-hide" id="video" lay-filter="test"></table>
+<!--自定义头部按钮-->
+<script type="text/html" id="bar">
+    <div class="layui-btn-group">
+        <button type="button" class="layui-btn layui-btn-primary layui-btn-sm" lay-event="add">
+            <i class="layui-icon">&#xe654;</i>
+        </button>
+        <button type="button" class="layui-btn layui-btn-primary layui-btn-sm" lay-event="delete">
+            <i class="layui-icon">&#xe640;</i>
+        </button>
+    </div>
+</script>
+
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script type="text/javascript" src="../layui/layui.js"></script>
+<script type="text/javascript">
+    layui.use(['table', 'form', 'layer', 'laydate'], function () {
+        var table = layui.table,
+            form = layui.form,
+            $ = layui.jquery,
+            layer = layui.layer,
+            laydate = layui.laydate
+
+        $.ajax({
+            type:"get",
+            url:'../videos/getAll',
+            data:{
+                page:1,
+                limit:10
+            },
+            dataType:'json',
+            success:function (res) {
+                var rest = ["1","2","3","4"];
+                $("#s1").empty()
+                $.each(rest,function(index,val){
+                    $("#s1").append('<option value="'+val+'">'+val+'</option>')
+                })
+                form.render(); //更新全部
+            }
+        })
+        form.on('select(n1)', function(data){
+            console.log(data.value); //得到被选中的值
+            $.ajax({
+                type:"get",
+                url:'../videos/getAll',
+                data:{
+                    page:1,
+                    limit:10,
+                    'value':data.value
+                },
+                dataType:'json',
+                success:function (res) {
+                    var rest = ["2","2","3","4"];
+                    $("#s2").empty()
+                    $.each(rest,function(index,val){
+                        $("#s2").append('<option value="'+val+'">'+val+'</option>')
+                    })
+                    form.render(); //更新全部
+                }
+            })
+        });
+
+
+        laydate.render({
+            elem: "#test1"
+            , type: 'datetime'
+            , range: '~'
+        })
+        //执行一个 table 实例
+        var tableIns = table.render({
+            elem: '#video',
+            height: 420,
+            url: 'http://localhost:8080/trill_cqlg/videos/getAll' //数据接口
+            ,
+            title: '视频表',
+            page: true //开启分页
+            ,
+            toolbar: '#bar' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
+            ,
+            parseData: function (res) { //res 即为原始返回的数据
+                return {
+                    "code": res.status, //解析接口状态
+                    "msg": res.message, //解析提示文本
+                    "count": res.total, //解析数据长度
+                    "data": res.data //解析数据列表
+                };
+            },
+            cols: [
+                [ //表头
+                    {
+                        type: 'checkbox',
+                        fixed: 'left'
+                    }, {
+                    field: 'id',  //必须和json数据中的key值一样
+                    title: 'ID',
+                    sort: true,//排序
+                    fixed: 'left', //固定某一列的位置
+                }, {
+                    field: 'nickname',
+                    title: '用户别名',
+                }, {
+                    field: 'video_desc',
+                    title: '视频描述',
+                    edit: 'text'
+                }, {
+                    field: 'video_path',
+                    title: '视频',
+                }, {
+                    field: 'create_time',
+                    title: '上传时间',
+                    sort: true,
+                }, {
+                    field: 'status',
+                    title: '视频状态',
+                    templet: function (res) {
+                        var vid = res.id
+                        //当status为1的时候  是发布状态   0的时候为下线状态
+                        if (res.status == 1) {
+
+                            return '<input type="checkbox" value="' + vid + '"name="status"  lay-skin="switch" lay-text="发布|下线" lay-filter="statusfilter" checked>'
+
+                        } else if (res.status == 0) {
+                            return '<input type="checkbox" value="' + vid + '"name="status"  lay-skin="switch" lay-text="发布|下线" lay-filter="statusfilter">'
+                        }
+                    }
+                }, {
+                    field: 'like_counts',
+                    title: '点赞量',
+                    edit: 'text'
+                }, {
+                    fixed: 'right',
+                    width: 165,
+                    align: 'center',
+                    toolbar: '#barDemo'
+                }
+                ]
+            ]
+        });
+        //实现swtich监听
+        form.on('switch(statusfilter)', function (obj) {
+            var sta = obj.elem.checked;
+            var status;
+            if (sta == true) {
+                status = 1
+            } else if (sta === false) {
+                status = 0
+            }
+            //得像后台发送请求
+            $.ajax({
+                type: 'post',
+                url: '/trill_cqlg/videos/update',
+                data: {
+                    'id': obj.value,
+                    'value': status,
+                    'field': 'status'
+                },
+                dataType: 'json',
+                success: function (res) {
+                    //应该从后台得到更新的消息
+                    layer.msg(res.message)
+                }
+            })
+        });
+        //监听单元格编辑
+        table.on('edit(test)', function (obj) {
+            var value = obj.value //得到修改后的值
+                , data = obj.data //得到所在行所有键值
+                , field = obj.field; //得到字段
+            console.log(data)
+            console.log(field)
+            $.ajax({
+                type: "post",
+                url: "../videos/update",
+                data: {
+                    "id": data.id,
+                    "field": field,
+                    "value": value
+                },
+                dataType: 'json',
+                success: function (res) {
+                    if (res.status == 0) {
+                        layer.msg(res.message, {
+                            icon: 1
+                        }, function () {
+                            //进行更新表格
+                            tableIns.reload();
+                        })
+                    }
+
+                    //此处跟新表格
+                }
+            })
+
+
+        });
+        //监听行工具事件
+        table.on('tool(test)', function (obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+            var data = obj.data //获得当前行数据
+                , layEvent = obj.event; //获得 lay-event 对应的值
+            if (layEvent === 'detail') {
+                //去后台拿详细的数据   加载目标页面
+                $.ajax({
+                    type: 'get',
+                    url: '../videos/findVideoById?id=' + data.id,
+                    dataType: 'json',
+                    success: function (res) {
+                        //弹出新的页面
+                        layer.open({
+                            type: 2,
+                            title: 'video信息',
+                            area: ['90%', '90%'],
+                            content: "../home/videoinfo",//还得考虑数据的渲染
+                            success: function (layero, index) {
+                                var body = layer.getChildFrame('body', index);
+                                var iframeWin = window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+                                body.find('#videoDesc').val(res.videoDesc)
+                                if (res.status == 1) {
+                                    body.find('#stu').attr("checked", "checked")
+                                }
+                            }
+                        });
+                    }
+                })
+            } else if (layEvent === 'del') {
+                layer.confirm('真的删除行么', function (index) {
+                    obj.del(); //删除对应行（tr）的DOM结构
+                    layer.close(index);
+                    //向服务端发送删除指令
+                });
+            } else if (layEvent === 'edit') {
+                layer.msg('编辑操作');
+            }
+        });
+        //监听头工具事件
+        table.on('toolbar(test)', function (obj) {
+            var checkStatus = table.checkStatus(obj.config.id)
+                , data = checkStatus.data; //获取选中的数据
+            switch (obj.event) {
+                case 'add':
+                    layer.open({
+                        type:2,
+                        title:'上传视频',
+                        area:['600px','300px'],
+                        content:'../videos/addpath'
+                    })
+                    break;
+                case 'update':
+                    if (data.length === 0) {
+                        layer.msg('请选择一行');
+                    } else if (data.length > 1) {
+                        layer.msg('只能同时编辑一个');
+                    } else {
+                        layer.alert('编辑 [id]：' + checkStatus.data[0].id);
+                    }
+                    break;
+                case 'delete':
+                    //传多行数据id   1. 把所有id通过某个字符拼接成字符串 2.传数组到后台
+                    if (data.length === 0) {
+                        layer.msg('请选择一行');
+                    } else {
+                        //应该得到一个数组存放着--》所有选中的id
+                        var ids = new Array();
+                        for (var i in data) {
+                            ids[i] = data[i].id
+                        }
+                        console.log(ids)
+                        //向后台发送删除请求
+                        $.ajax({
+                            type: 'post',
+                            url: '../videos/delete',
+                            data: {
+                                'ids': ids
+                            },
+                            traditional: true, //告诉后台，数据类型为数组
+                            dataType: 'json',
+                            success: function (res) {
+                                layer.msg(res.message, function () {
+                                    tableIns.reload();
+                                });
+                            }
+                        })
+
+                    }
+                    break;
+            }
+            ;
+        });
+
+        //搜索功能
+        $("#search").on('click', function () {
+            tableIns.reload({
+                url: '../videos/selectByLike',
+                where: { //设定异步数据接口的额外参数，任意设
+                    'id': $("#vid").val(),
+                    'videoDesc': $("#videodesc").val()
+                }
+                , page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+            });
+        })
+    })
+</script>
+</body>
+
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" type="text/css" href="../layui/css/layui.css" />
+</head>
+<body>
+<form class="layui-form" >
+    <div class="layui-form-item">
+        <label class="layui-form-label">视频描述</label>
+        <div class="layui-input-inline">
+            <input type="text" name="videoDesc" lay-verify="title" autocomplete="off" placeholder="请输入视频描述" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item" style="margin-left: 40px">
+        <div class="layui-upload-drag" id="test10">
+            <i class="layui-icon"></i>
+            <p>点击上传，或将文件拖拽到此处</p>
+            <div class="layui-hide" id="uploadDemoView">
+                <hr>
+                <input type="text" name="videoPath"  autocomplete="off" placeholder="" class="layui-input">
+            </div>
+        </div>
+    </div>
+
+</form>
+</body>
+<script type="text/javascript" src="../layui/layui.js"></script>
+<script>
+    layui.use(['form','upload'],function(){
+        var form = layui.form,
+            upload = layui.upload,
+            $ = layui.jquery
+
+        upload.render({
+            elem: '#test10'
+            ,url: '../videos/up' //改成您自己的上传接口
+            // ,filed:'kk'
+            ,accept:'video'
+            ,done: function(res){
+                layer.msg('上传成功');
+                layui.$('#uploadDemoView').removeClass('layui-hide').find('input').val(res.message);
+                console.log(res)
+            }
+        });
+    })
+
+
+</script>
+</html>
