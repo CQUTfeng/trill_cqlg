@@ -62,7 +62,16 @@
     <!--</mvc:resources>-->
     <mvc:resources location="/layui/" mapping="/layui/**">
     </mvc:resources>
-    
+
+
+    <!--    <mvc:interceptors>-->
+    <!--        <mvc:interceptor>-->
+    <!--            <mvc:mapping path="/videos/*"/>-->
+    <!--            <mvc:mapping path="/home/videoinfo"/>-->
+    <!--            <bean class="com.qf.trillcqlg.filter.Interfilter"></bean>-->
+    <!--        </mvc:interceptor>-->
+    <!--    </mvc:interceptors>-->
+
 <!--    <mvc:interceptors>-->
 <!--        <mvc:interceptor>-->
 <!--            <mvc:mapping path="/videos/*"/>-->
